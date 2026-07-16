@@ -1,0 +1,4 @@
+interface:
+  display_name: "Join Me Onboarding"
+  short_description: "Design and build the Join Me onboarding demo"
+  default_prompt: "Use $app-onboarding-questionnaire to design a focused onboarding demo for Join Me."

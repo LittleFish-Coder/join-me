@@ -6,15 +6,36 @@ struct ReviewView: View {
     @State private var isPresentingComposer = ProcessInfo.processInfo.arguments.contains("--show-composer")
     @State private var myCommissionScope: MyCommissionScope = .hosted
     @State private var editingDraft: CommissionEditDraft?
+    var onboarding: OnboardingGuideState?
+    var onboardingCommissionID: UUID?
+    var finishOnboarding: () -> Void
+
+    init(
+        selectedTab: Binding<AppTab>,
+        onboarding: OnboardingGuideState? = nil,
+        onboardingCommissionID: UUID? = nil,
+        finishOnboarding: @escaping () -> Void = {}
+    ) {
+        _selectedTab = selectedTab
+        self.onboarding = onboarding
+        self.onboardingCommissionID = onboardingCommissionID
+        self.finishOnboarding = finishOnboarding
+    }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 18) {
-                reviewHero
-                queueSection
-                myCommissionsSection
+        ScrollViewReader { proxy in
+            ScrollView {
+                VStack(alignment: .leading, spacing: 18) {
+                    reviewHero
+                    queueSection
+                    myCommissionsSection
+                }
+                .padding(16)
+                .padding(.bottom, 28)
             }
-            .padding(16)
+            .onChange(of: onboarding?.step, initial: true) { _, step in
+                revealOnboardingApplication(for: step, with: proxy)
+            }
         }
         .background(JoinMeStyle.background)
         .navigationTitle("發起與審核")
@@ -117,13 +138,59 @@ struct ReviewView: View {
                 } else {
                     ForEach(store.myApplications) { application in
                         if let commission = store.commission(id: application.commissionID) {
-                            AppliedCommissionCard(application: application, commission: commission)
+                            let isOnboardingTarget = application.commissionID == onboardingCommissionID
+                                && onboarding?.step == .result
+
+                            VStack(alignment: .leading, spacing: 10) {
+                                if isOnboardingTarget {
+                                    OnboardingResultBanner()
+                                }
+
+                                NavigationLink {
+                                    CommissionDetailView(
+                                        commissionID: commission.id,
+                                        selectedTab: $selectedTab
+                                    )
+                                } label: {
+                                    AppliedCommissionCard(
+                                        application: application,
+                                        commission: commission,
+                                        isOnboardingTarget: isOnboardingTarget
+                                    )
+                                }
+                                .buttonStyle(.plain)
+                                .accessibilityLabel("\(commission.title)，\(application.status.label)，查看委託詳情")
+
+                                if isOnboardingTarget {
+                                    Button("開始探索", action: finishOnboarding)
+                                        .buttonStyle(.borderedProminent)
+                                }
+                            }
+                            .id(ReviewScrollTarget.application(application.commissionID))
                         }
                     }
                 }
             }
         }
     }
+
+    private func revealOnboardingApplication(for step: OnboardingStep?, with proxy: ScrollViewProxy) {
+        guard step == .result, let onboardingCommissionID else { return }
+        myCommissionScope = .applied
+
+        Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 350_000_000)
+            guard onboarding?.step == .result else { return }
+
+            withAnimation(.smooth(duration: 0.55)) {
+                proxy.scrollTo(ReviewScrollTarget.application(onboardingCommissionID), anchor: .center)
+            }
+        }
+    }
+}
+
+private enum ReviewScrollTarget: Hashable {
+    case application(UUID)
 }
 
 private enum MyCommissionScope: String, CaseIterable, Identifiable {
@@ -199,6 +266,7 @@ struct HostedCommissionManagementCard: View {
 struct AppliedCommissionCard: View {
     var application: JoinApplication
     var commission: JoinCommission
+    var isOnboardingTarget = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
@@ -219,8 +287,24 @@ struct AppliedCommissionCard: View {
                     Text("狀態：\(application.status.label)")
                         .font(.caption.weight(.bold))
                         .foregroundStyle(statusColor)
+                        .padding(.horizontal, isOnboardingTarget ? 8 : 0)
+                        .padding(.vertical, isOnboardingTarget ? 5 : 0)
+                        .fixedSize(horizontal: true, vertical: true)
+                        .background {
+                            if isOnboardingTarget {
+                                Capsule().fill(statusColor.opacity(0.14))
+                            }
+                        }
+                        .overlay {
+                            if isOnboardingTarget {
+                                Capsule()
+                                    .stroke(statusColor.opacity(0.7), lineWidth: 1.5)
+                            }
+                        }
                 }
                 Spacer()
+                Image(systemName: "chevron.right")
+                    .foregroundStyle(.tertiary)
             }
 
             Text(application.note)
@@ -240,8 +324,13 @@ struct AppliedCommissionCard: View {
         .background(.white, in: RoundedRectangle(cornerRadius: 8))
         .overlay {
             RoundedRectangle(cornerRadius: 8)
-                .stroke(.black.opacity(0.06))
+                .stroke(isOnboardingTarget ? JoinMeStyle.leaf : .black.opacity(0.06), lineWidth: isOnboardingTarget ? 2 : 1)
         }
+        .shadow(
+            color: isOnboardingTarget ? JoinMeStyle.leaf.opacity(0.18) : .clear,
+            radius: isOnboardingTarget ? 10 : 0,
+            y: isOnboardingTarget ? 4 : 0
+        )
     }
 
     private var statusSymbolName: String {

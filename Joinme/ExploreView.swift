@@ -7,10 +7,24 @@ struct ExploreView: View {
     @State private var query = ""
     @State private var selectedTag: String?
     @State private var mode: ExploreMode
+    var onboarding: OnboardingGuideState?
+    var onboardingCommissionID: UUID?
+    var onLowPressureSelected: (() -> Void)?
+    var onCommissionOpened: ((UUID) -> Void)?
 
-    init(selectedTab: Binding<AppTab>) {
+    init(
+        selectedTab: Binding<AppTab>,
+        onboarding: OnboardingGuideState? = nil,
+        onboardingCommissionID: UUID? = nil,
+        onLowPressureSelected: (() -> Void)? = nil,
+        onCommissionOpened: ((UUID) -> Void)? = nil
+    ) {
         _selectedTab = selectedTab
         _mode = State(initialValue: ProcessInfo.processInfo.arguments.contains("--map-mode") ? .map : .nearby)
+        self.onboarding = onboarding
+        self.onboardingCommissionID = onboardingCommissionID
+        self.onLowPressureSelected = onLowPressureSelected
+        self.onCommissionOpened = onCommissionOpened
     }
 
     private enum ExploreMode: String, CaseIterable, Identifiable {
@@ -32,32 +46,34 @@ struct ExploreView: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 18) {
-                JoinMeWordmark()
-                hero
-                searchControls
+        ScrollViewReader { proxy in
+            ScrollView {
+                VStack(alignment: .leading, spacing: 18) {
+                    JoinMeWordmark()
+                    hero
+                    searchControls
 
-                if mode == .map {
-                    MapKitCommissionMapView(commissions: filteredCommissions)
-                }
+                    if mode == .map {
+                        MapKitCommissionMapView(commissions: filteredCommissions)
+                    }
 
-                SectionHeader("附近委託", caption: "先看時間、地點與目的，找到剛好能同行的人。")
+                    SectionHeader("附近委託", caption: "先看時間、地點與目的，找到剛好能同行的人。")
 
-                LazyVStack(spacing: 12) {
-                    ForEach(filteredCommissions) { commission in
-                        NavigationLink {
-                            CommissionDetailView(commissionID: commission.id, selectedTab: $selectedTab)
-                        } label: {
-                            CommissionCard(commission: commission)
+                    LazyVStack(spacing: 12) {
+                        ForEach(filteredCommissions) { commission in
+                            commissionRow(commission)
+                                .id(ExploreScrollTarget.commission(commission.id))
                         }
-                        .buttonStyle(.plain)
                     }
                 }
+                .padding(16)
+                .padding(.bottom, 28)
+                .frame(maxWidth: 720)
+                .frame(maxWidth: .infinity)
             }
-            .padding(16)
-            .frame(maxWidth: 720)
-            .frame(maxWidth: .infinity)
+            .onChange(of: onboarding?.step, initial: true) { _, step in
+                scrollToOnboardingTarget(step, with: proxy)
+            }
         }
         .background(JoinMeStyle.background)
         .navigationTitle("")
@@ -123,31 +139,133 @@ struct ExploreView: View {
             .padding(12)
             .background(.white, in: RoundedRectangle(cornerRadius: 8))
 
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 8) {
-                    Button {
-                        selectedTag = nil
-                    } label: {
-                        JMTag(text: "全部", isSelected: selectedTag == nil)
-                    }
-                    .buttonStyle(.plain)
+            if onboarding?.step == .chooseLowPressure {
+                OnboardingStepPrompt(
+                    title: "今天想找一位輕鬆、低壓的同行夥伴",
+                    detail: "先從「低壓」篩選開始。"
+                )
+            }
 
-                    ForEach(store.allTags, id: \.self) { tag in
-                        Button {
-                            selectedTag = tag
-                        } label: {
-                            JMTag(text: tag, isSelected: selectedTag == tag)
+            ScrollViewReader { proxy in
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(alignment: .center, spacing: 8) {
+                        tagButton("全部") {
+                            selectedTag = nil
                         }
-                        .buttonStyle(.plain)
+
+                        ForEach(store.allTags, id: \.self) { tag in
+                            if tag == "低壓", onboarding?.step == .chooseLowPressure {
+                                VStack(spacing: 5) {
+                                    tagButton(tag) {
+                                        selectTag(tag)
+                                    }
+                                    .overlay {
+                                        OnboardingTargetHalo(cornerRadius: 20)
+                                    }
+
+                                    OnboardingCallout(title: "點這裡", systemImage: "arrow.up")
+                                }
+                                .id(ExploreScrollTarget.lowPressureTag)
+                            } else {
+                                tagButton(tag) {
+                                    selectTag(tag)
+                                }
+                            }
+                        }
                     }
+                }
+                .id(ExploreScrollTarget.tagRow)
+                .onChange(of: onboarding?.step, initial: true) { _, step in
+                    guard step == .chooseLowPressure else { return }
+                    Task { @MainActor in
+                        try? await Task.sleep(nanoseconds: 250_000_000)
+                        withAnimation(.smooth(duration: 0.45)) {
+                            proxy.scrollTo(ExploreScrollTarget.lowPressureTag, anchor: .center)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private func tagButton(_ tag: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            JMTag(text: tag, isSelected: selectedTag == (tag == "全部" ? nil : tag))
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func selectTag(_ tag: String) {
+        selectedTag = tag
+        if tag == "低壓" {
+            onLowPressureSelected?()
+        }
+    }
+
+    private func commissionRow(_ commission: JoinCommission) -> some View {
+        let isOnboardingTarget = commission.id == onboardingCommissionID && onboarding?.step == .chooseCommission
+
+        return VStack(alignment: .leading, spacing: 8) {
+            NavigationLink {
+                CommissionDetailView(
+                    commissionID: commission.id,
+                    selectedTab: $selectedTab,
+                    onboarding: commission.id == onboardingCommissionID ? onboarding : nil,
+                    onApplicationSubmitted: { submittedCommissionID in
+                        guard submittedCommissionID == onboardingCommissionID,
+                              onboarding?.step == .apply else { return }
+                        onboarding?.advance(to: .result)
+                    }
+                )
+            } label: {
+                CommissionCard(commission: commission, isOnboardingTarget: isOnboardingTarget)
+            }
+            .buttonStyle(.plain)
+            .simultaneousGesture(
+                TapGesture().onEnded {
+                    onCommissionOpened?(commission.id)
+                }
+            )
+
+            if isOnboardingTarget {
+                OnboardingRecommendationReason()
+                OnboardingCallout(title: "點這張看看")
+            }
+        }
+    }
+
+    private func scrollToOnboardingTarget(_ step: OnboardingStep?, with proxy: ScrollViewProxy) {
+        guard let step else { return }
+
+        Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 250_000_000)
+            guard onboarding?.step == step else { return }
+
+            withAnimation(.smooth(duration: 0.55)) {
+                switch step {
+                case .chooseLowPressure:
+                    proxy.scrollTo(ExploreScrollTarget.tagRow, anchor: .center)
+                case .chooseCommission:
+                    if let onboardingCommissionID {
+                        proxy.scrollTo(ExploreScrollTarget.commission(onboardingCommissionID), anchor: .center)
+                    }
+                case .confirmDetails, .apply, .result:
+                    break
                 }
             }
         }
     }
 }
 
+private enum ExploreScrollTarget: Hashable {
+    case tagRow
+    case lowPressureTag
+    case commission(UUID)
+}
+
 struct CommissionCard: View {
     var commission: JoinCommission
+    var isOnboardingTarget = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
@@ -199,7 +317,17 @@ struct CommissionCard: View {
         .background(.white, in: RoundedRectangle(cornerRadius: 8))
         .overlay {
             RoundedRectangle(cornerRadius: 8)
-                .stroke(.black.opacity(0.06))
+                .stroke(isOnboardingTarget ? JoinMeStyle.leaf : .black.opacity(0.06), lineWidth: isOnboardingTarget ? 2 : 1)
+        }
+        .shadow(
+            color: isOnboardingTarget ? JoinMeStyle.leaf.opacity(0.20) : .clear,
+            radius: isOnboardingTarget ? 12 : 0,
+            y: isOnboardingTarget ? 5 : 0
+        )
+        .overlay {
+            if isOnboardingTarget {
+                OnboardingTargetHalo(cornerRadius: 8)
+            }
         }
     }
 }

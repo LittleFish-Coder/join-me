@@ -333,6 +333,12 @@ final class JoinMeStore {
         )
     }
 
+    func resetCurrentUserApplication(for commissionID: UUID) {
+        applications.removeAll {
+            $0.commissionID == commissionID && $0.applicant.id == currentUser.id
+        }
+    }
+
     func approve(applicationID: UUID) -> ActivityChat? {
         guard let index = applications.firstIndex(where: { $0.id == applicationID }),
               let commission = commission(id: applications[index].commissionID) else {

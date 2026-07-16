@@ -4,6 +4,8 @@ struct CommissionDetailView: View {
     @Environment(JoinMeStore.self) private var store
     var commissionID: UUID
     @Binding var selectedTab: AppTab
+    var onboarding: OnboardingGuideState?
+    var onApplicationSubmitted: ((UUID) -> Void)?
     @State private var note = "我可以準時到，想用低壓方式一起完成這個委託。"
 
     private var commission: JoinCommission? {
@@ -16,15 +18,23 @@ struct CommissionDetailView: View {
 
     var body: some View {
         if let commission {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 18) {
-                    titleBlock(commission)
-                    hostBlock(commission.host)
-                    detailRows(commission)
-                    descriptionBlock(commission)
-                    applyBlock(commission)
+            ScrollViewReader { proxy in
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 18) {
+                        titleBlock(commission)
+                        hostBlock(commission.host)
+                            .id(CommissionDetailScrollTarget.host)
+                        keyFactsBlock(commission)
+                            .id(CommissionDetailScrollTarget.keyFacts)
+                        applyBlock(commission)
+                            .id(CommissionDetailScrollTarget.apply)
+                    }
+                    .padding(16)
+                    .padding(.bottom, 28)
                 }
-                .padding(16)
+                .onChange(of: onboarding?.step, initial: true) { _, step in
+                    scrollToOnboardingTarget(step, with: proxy)
+                }
             }
             .background(JoinMeStyle.background)
             .navigationTitle("委託詳情")
@@ -34,8 +44,34 @@ struct CommissionDetailView: View {
         }
     }
 
+    private func keyFactsBlock(_ commission: JoinCommission) -> some View {
+        let isOnboardingTarget = onboarding?.step == .confirmDetails
+
+        return VStack(alignment: .leading, spacing: 12) {
+            detailRows(commission)
+            descriptionBlock(commission)
+
+            if isOnboardingTarget {
+                OnboardingCallout(title: "時間、地點、相處方式都清楚")
+
+                Button {
+                    onboarding?.moveToApplication()
+                } label: {
+                    Label("帶我去加入", systemImage: "arrow.down")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
+            }
+        }
+        .overlay {
+            if isOnboardingTarget {
+                OnboardingTargetHalo(cornerRadius: 12)
+            }
+        }
+    }
+
     private func titleBlock(_ commission: JoinCommission) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
+        return VStack(alignment: .leading, spacing: 12) {
             HStack {
                 BrandGradient()
                     .frame(width: 46, height: 46)
@@ -120,7 +156,9 @@ struct CommissionDetailView: View {
     }
 
     private func applyBlock(_ commission: JoinCommission) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
+        let isOnboardingTarget = onboarding?.step == .apply
+
+        return VStack(alignment: .leading, spacing: 12) {
             SectionHeader("投遞狀態", caption: status.label)
 
             if commission.isHostedByCurrentUser {
@@ -135,19 +173,37 @@ struct CommissionDetailView: View {
                 }
                 .buttonStyle(.borderedProminent)
             } else if status == .none {
+                if onboarding?.showsScrollConfirmation == true {
+                    Text("已幫你滑到這裡")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(JoinMeStyle.secondaryInk)
+                }
+                if isOnboardingTarget {
+                    OnboardingCallout(title: "送出即可")
+                }
+
                 TextField("簡短說明你為什麼適合", text: $note, axis: .vertical)
                     .lineLimit(3...5)
                     .padding(12)
                     .background(JoinMeStyle.background, in: RoundedRectangle(cornerRadius: 8))
 
                 Button {
+                    guard store.applicationStatus(for: commission.id) == .none else { return }
                     store.apply(to: commission.id, note: note)
-                    selectedTab = .review
+                    onApplicationSubmitted?(commission.id)
+                    if onboarding != nil {
+                        selectedTab = .review
+                    }
                 } label: {
                     Label("我想加入", systemImage: "paperplane.fill")
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
+                .overlay {
+                    if isOnboardingTarget {
+                        OnboardingTargetHalo(cornerRadius: 8)
+                    }
+                }
             } else {
                 Label("申請已送出，發起人回覆後會更新狀態。", systemImage: "paperplane.circle.fill")
                     .font(.subheadline)
@@ -166,6 +222,32 @@ struct CommissionDetailView: View {
         .padding(14)
         .background(.white, in: RoundedRectangle(cornerRadius: 8))
     }
+
+    private func scrollToOnboardingTarget(_ step: OnboardingStep?, with proxy: ScrollViewProxy) {
+        guard let step else { return }
+
+        Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 300_000_000)
+            guard onboarding?.step == step else { return }
+
+            withAnimation(.smooth(duration: 0.55)) {
+                switch step {
+                case .confirmDetails:
+                    proxy.scrollTo(CommissionDetailScrollTarget.host, anchor: .top)
+                case .apply:
+                    proxy.scrollTo(CommissionDetailScrollTarget.apply, anchor: .center)
+                case .chooseLowPressure, .chooseCommission, .result:
+                    break
+                }
+            }
+        }
+    }
+}
+
+private enum CommissionDetailScrollTarget: Hashable {
+    case host
+    case keyFacts
+    case apply
 }
 
 struct DetailRow: View {

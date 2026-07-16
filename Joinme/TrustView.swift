@@ -4,6 +4,7 @@ struct TrustView: View {
     @Environment(JoinMeStore.self) private var store
     @State private var selectedReview: PendingReview?
     @State private var isEditingProfile = false
+    var replayOnboarding: () -> Void = {}
 
     var body: some View {
         ScrollView {
@@ -122,7 +123,7 @@ struct TrustView: View {
             SectionHeader("使用協助")
 
             NavigationLink {
-                OnboardingGuideView()
+                OnboardingGuideView(replayOnboarding: replayOnboarding)
             } label: {
                 SupportRow(symbolName: "sparkles", title: "新手教學", caption: "從找委託到活動後互評")
             }
@@ -312,6 +313,8 @@ struct RatingPicker: View {
 }
 
 struct OnboardingGuideView: View {
+    var replayOnboarding: () -> Void
+
     private let steps = [
         ("1", "探索附近委託", "依時間、地點與類型篩選，找到適合的同行需求。", "sparkle.magnifyingglass"),
         ("2", "送出申請", "簡短說明你能配合的方式，等待發起人審核。", "paperplane.fill"),
@@ -342,6 +345,13 @@ struct OnboardingGuideView: View {
                     .padding(14)
                     .background(.white, in: RoundedRectangle(cornerRadius: 8))
                 }
+
+                Button(action: replayOnboarding) {
+                    Label("重新教學", systemImage: "arrow.counterclockwise")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .accessibilityIdentifier("replayOnboardingButton")
             }
             .padding(16)
         }

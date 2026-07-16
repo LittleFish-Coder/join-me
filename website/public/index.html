@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="揪ㄇ讓面對面的社交像線上遊戲揪團一樣簡單。寫下時間、地點與想做的事，找到剛好同行的人。" />
+    <meta name="theme-color" content="#f8faf5" />
+    <meta property="og:title" content="揪ㄇ｜想做件小事，剛好有人一起" />
+    <meta property="og:description" content="不用滑卡，不急著深聊。把想做的事說清楚，就能找到同行的人。" />
+    <meta property="og:image" content="/assets/bird-icon.jpeg" />
+    <title>揪ㄇ｜無壓力的當下社交</title>
+    <link rel="icon" href="/assets/bird-icon.jpeg" />
+    <link rel="stylesheet" href="/styles.css" />
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">跳到主要內容</a>
+    <header class="site-header" data-header>
+      <a class="brand" href="/" aria-label="揪ㄇ首頁">
+        <img src="/assets/bird-icon.jpeg" alt="" />
+        <span>揪ㄇ</span>
+      </a>
+      <button class="menu-button" type="button" aria-expanded="false" aria-controls="site-nav" data-menu-button>
+        <span></span><span></span><span></span><span class="sr-only">開啟選單</span>
+      </button>
+      <nav id="site-nav" class="site-nav" aria-label="主要導覽" data-nav>
+        <a href="#why">為什麼是揪ㄇ</a>
+        <a href="#how">怎麼運作</a>
+        <a href="#trust">安心機制</a>
+      </nav>
+      <a class="button button-small header-cta" href="#waitlist">加入測試名單</a>
+    </header>
+
+    <main id="main">
+      <section class="hero section-shell" aria-labelledby="hero-title">
+        <div class="hero-copy reveal">
+          <h1 id="hero-title">想做件小事，<br />剛好有人一起。</h1>
+          <p>不用滑卡，不急著深聊。把時間、地點和想做的事說清楚，就能找到同行的人。</p>
+          <form class="inline-form" data-form="waitlist" data-source="hero" novalidate>
+            <label class="input-wrap">
+              <span class="sr-only">Email</span>
+              <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M3 6.5h18v12H3zM3.5 7l8.5 6 8.5-6" /></svg>
+              <input type="email" name="email" autocomplete="email" placeholder="輸入 Email" required />
+            </label>
+            <button class="button" type="submit">加入測試名單</button>
+            <p class="form-status" role="status" aria-live="polite"></p>
+          </form>
+          <span class="reassurance">只寄送測試通知，不打擾。</span>
+          <a class="text-link" href="#how">看看怎麼運作 <span aria-hidden="true">→</span></a>
+        </div>
+
+        <div class="hero-visual reveal" aria-label="揪ㄇ App 委託探索畫面">
+          <div class="ambient ambient-orange"></div>
+          <div class="phone phone-hero">
+            <img src="/assets/app-explore.png" alt="揪ㄇ App 探索頁，顯示附近的即時委託" />
+          </div>
+          <article class="float-request request-one">
+            <span class="spark">✦</span>
+            <strong>跑咖互拍一小時</strong>
+            <small>台北中山 · 今晚 19:00 · 1 / 3 人</small>
+          </article>
+          <article class="float-request request-two">
+            <span class="bolt">ϟ</span>
+            <strong>手搖飲買一送一缺一杯</strong>
+            <small>台北大安 · 今天 16:20 · 1 / 2 人</small>
+          </article>
+        </div>
+        <div class="bird-scene" aria-hidden="true">
+          <img src="/assets/bird-icon.jpeg" alt="" />
+          <span></span>
+        </div>
+      </section>
+
+      <section id="why" class="why section-shell reveal" aria-labelledby="why-title">
+        <h2 id="why-title">不是交友，是剛好同行。</h2>
+        <p class="section-lead">不為關係預設終點，只為當下的一件小事找到剛好的人。</p>
+        <div class="contrast-row">
+          <article><span>01</span><h3>事情先說清楚</h3><p>時間、地點、人數與期待都寫在委託單上，少一點猜測。</p></article>
+          <article><span>02</span><h3>關係不用勉強</h3><p>完成活動就是一次完整的相遇，不必承諾下一次。</p></article>
+          <article><span>03</span><h3>當下就能出發</h3><p>從買一送一、跑咖到漫展，讓臨時起意不再只能作罷。</p></article>
+        </div>
+      </section>
+
+      <section id="how" class="workflow" aria-labelledby="how-title">
+        <div class="section-shell">
+          <div class="center-heading reveal">
+            <h2 id="how-title">一張委託單，把社交變簡單。</h2>
+            <p>像線上遊戲揪團一樣，把需求講清楚；要不要一起，就由當下決定。</p>
+          </div>
+          <ol class="step-rail reveal">
+            <li><span>01</span><i data-icon="write"></i><h3>發布委託</h3><p>寫下想做的事、地點、時間與同行條件。</p></li>
+            <li><span>02</span><i data-icon="pin"></i><h3>找到同路人</h3><p>用附近地圖、關鍵字與標籤，快速篩選。</p></li>
+            <li><span>03</span><i data-icon="people"></i><h3>確認再開聊</h3><p>申請通過後才進入活動聊天室。</p></li>
+            <li><span>04</span><i data-icon="archive"></i><h3>完成就歸檔</h3><p>活動結束 24 小時後自動關閉，不留下社交壓力。</p></li>
+          </ol>
+
+          <div class="product-story">
+            <article class="story-row reveal">
+              <div class="story-media"><div class="phone"><img src="/assets/app-publish.png" alt="發布委託表單，包含委託類型、名稱、地點與時間" /></div></div>
+              <div class="story-copy"><span>01</span><h3>快速發布，說清楚就好</h3><p>從活動名稱、地點、時間到細節備註，一次設定想找的同行方式。</p><ul><li>多種活動類型</li><li>條件與需求集中呈現</li><li>發起後可修改細節</li></ul></div>
+            </article>
+            <article class="story-row reverse reveal">
+              <div class="story-media"><div class="phone"><img src="/assets/app-map.png" alt="附近地圖模式，顯示台北地區的即時委託" /></div></div>
+              <div class="story-copy"><span>02</span><h3>地圖找人，剛好在附近</h3><p>用地圖、關鍵字與標籤過濾掉不相關活動，只看此刻想參加的。</p><ul><li>附近地圖與列表切換</li><li>關鍵字和標籤篩選</li><li>依興趣優先推薦</li></ul></div>
+            </article>
+            <article class="story-row reveal">
+              <div class="story-media"><div class="phone"><img src="/assets/app-review.png" alt="申請者審核頁，顯示基本資料、鴿子指數與準時度" /></div></div>
+              <div class="story-copy"><span>03</span><h3>確認合適，再開始聊天</h3><p>發起人先查看申請者的基本資料與信用紀錄，錄取後才打開聊天室。</p><ul><li>條件符合才加入</li><li>信用資訊可供參考</li><li>錄取後自動開聊</li></ul></div>
+            </article>
+            <article class="story-row reverse reveal">
+              <div class="story-media"><div class="phone"><img src="/assets/app-chat.png" alt="跑咖互拍活動的專屬聊天室" /></div></div>
+              <div class="story-copy"><span>04</span><h3>專屬聊天室，只專心這次</h3><p>聊天只屬於這張委託。活動結束 24 小時後歸檔，保留紀錄也保留界線。</p><ul><li>只限錄取成員</li><li>專注行前確認</li><li>24 小時後自動歸檔</li></ul></div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="trust" class="trust section-shell" aria-labelledby="trust-title">
+        <div class="trust-copy reveal">
+          <h2 id="trust-title">輕鬆，不等於隨便。</h2>
+          <p class="section-lead">把界線、規則和信用放進產品裡，讓每一次見面都更安心。</p>
+          <ol class="trust-list">
+            <li><span>01</span><div><h3>先審核，再開聊</h3><p>申請通過後才建立活動聊天室。</p></div></li>
+            <li><span>02</span><div><h3>聊天會到期</h3><p>活動結束 24 小時後自動歸檔。</p></div></li>
+            <li><span>03</span><div><h3>信用看得見</h3><p>鴿子指數、準時度與活動後互評，讓選擇更有依據。</p></div></li>
+          </ol>
+        </div>
+        <div class="trust-visual reveal">
+          <div class="ambient ambient-yellow"></div>
+          <div class="phone phone-trust"><img src="/assets/app-trust.png" alt="揪ㄇ信用概念頁，顯示鴿子指數、準時度與活動後互評" /></div>
+          <div class="rating-note"><strong>拍照友善・準時・安靜省電</strong><span aria-label="五星評價">★★★★★</span></div>
+        </div>
+      </section>
+
+      <section id="waitlist" class="waitlist section-shell reveal" aria-labelledby="waitlist-title">
+        <div class="waitlist-bird" aria-hidden="true"><img src="/assets/bird-icon.jpeg" alt="" /></div>
+        <div class="waitlist-copy">
+          <h2 id="waitlist-title">第一批同行的人，想邀請你。</h2>
+          <p>留下 Email，App 開放測試時我們會第一時間通知你。</p>
+          <form class="inline-form light" data-form="waitlist" data-source="footer" novalidate>
+            <label class="input-wrap"><span class="sr-only">你的 Email</span><input type="email" name="email" autocomplete="email" placeholder="你的 Email" required /></label>
+            <button class="button button-light" type="submit">加入測試名單</button>
+            <p class="form-status" role="status" aria-live="polite"></p>
+          </form>
+          <span class="reassurance">只寄送測試與上線通知，隨時可以退出。</span>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer section-shell">
+      <div class="footer-brand"><a class="brand" href="/"><img src="/assets/bird-icon.jpeg" alt="" /><span>揪ㄇ</span></a><p>為當下的小事，找到剛好的同行。</p></div>
+      <nav aria-label="頁尾導覽"><a href="/support.html">Support</a><a href="/privacy.html">Privacy Policy</a><a href="/terms.html">Terms</a></nav>
+      <p>© 2026 揪ㄇ. All rights reserved.</p>
+    </footer>
+  </body>
+</html>

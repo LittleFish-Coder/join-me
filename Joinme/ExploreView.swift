@@ -2,7 +2,7 @@ import MapKit
 import SwiftUI
 
 struct ExploreView: View {
-    @EnvironmentObject private var store: JoinMeStore
+    @Environment(JoinMeStore.self) private var store
     @Binding var selectedTab: AppTab
     @State private var query = ""
     @State private var selectedTag: String?
@@ -27,13 +27,14 @@ struct ExploreView: View {
                 || commission.area.localizedStandardContains(query)
                 || commission.tags.contains { $0.localizedStandardContains(query) }
             let matchesTag = selectedTag == nil || commission.tags.contains(selectedTag!)
-            return matchesQuery && matchesTag
+            return !commission.isHostedByCurrentUser && matchesQuery && matchesTag
         }
     }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
+                JoinMeWordmark()
                 hero
                 searchControls
 
@@ -41,7 +42,7 @@ struct ExploreView: View {
                     MapKitCommissionMapView(commissions: filteredCommissions)
                 }
 
-                SectionHeader("附近委託", caption: "像線上遊戲揪團一樣，把需求講清楚就好。")
+                SectionHeader("附近委託", caption: "先看時間、地點與目的，找到剛好能同行的人。")
 
                 LazyVStack(spacing: 12) {
                     ForEach(filteredCommissions) { commission in
@@ -55,35 +56,40 @@ struct ExploreView: View {
                 }
             }
             .padding(16)
+            .frame(maxWidth: 720)
+            .frame(maxWidth: .infinity)
         }
         .background(JoinMeStyle.background)
-        .navigationTitle("Join me／揪ㄇ")
-        .navigationBarTitleDisplayMode(.large)
+        .navigationTitle("")
+        .navigationBarTitleDisplayMode(.inline)
     }
 
     private var hero: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack {
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("當下想找人一起做件小事")
+                    Text("想做的事，現在就找人同行")
                         .font(.title2.weight(.bold))
                         .foregroundStyle(.white)
-                    Text("不用滑卡，不急著深聊。委託單清楚，壓力就小。")
+                    Text("把目的、時間與地點說清楚，輕鬆找到剛好有空的人。")
                         .font(.subheadline)
                         .foregroundStyle(.white.opacity(0.88))
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 Spacer(minLength: 12)
-                Image(systemName: "figure.2.and.child.holdinghands")
-                    .font(.system(size: 34, weight: .semibold))
-                    .foregroundStyle(.white)
-                    .padding(12)
-                    .background(.white.opacity(0.18), in: RoundedRectangle(cornerRadius: 8))
+                ZStack {
+                    Circle()
+                        .fill(.white.opacity(0.18))
+                    Image(systemName: "link")
+                        .font(.system(size: 30, weight: .bold))
+                        .foregroundStyle(.white)
+                }
+                .frame(width: 58, height: 58)
             }
 
             HStack {
-                MetricPill(symbolName: "location.fill", text: "台北示範資料")
-                MetricPill(symbolName: "clock.fill", text: "多數 30 分內開始")
+                MetricPill(symbolName: "location.fill", text: "台北附近")
+                MetricPill(symbolName: "clock.fill", text: "隨時可以出發")
             }
         }
         .padding(18)
@@ -238,7 +244,7 @@ struct MapKitCommissionMapView: View {
                 .frame(height: 320)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
 
-                Label("MapKit 模擬導入", systemImage: "map.fill")
+                Label("附近委託", systemImage: "map.fill")
                     .font(.caption.weight(.bold))
                     .foregroundStyle(JoinMeStyle.ink)
                     .padding(.horizontal, 10)
@@ -248,8 +254,7 @@ struct MapKitCommissionMapView: View {
             }
 
             HStack(spacing: 8) {
-                MetricPill(symbolName: "scope", text: "台北附近 \(commissions.count) 張")
-                MetricPill(symbolName: "location.magnifyingglass", text: "假座標，未啟用定位")
+                MetricPill(symbolName: "scope", text: "共 \(commissions.count) 張委託")
             }
         }
         .padding(10)

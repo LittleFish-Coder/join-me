@@ -31,7 +31,7 @@ enum AppTab: String, CaseIterable, Identifiable {
         case .explore: "探索"
         case .review: "審核"
         case .chats: "聊天室"
-        case .trust: "信用"
+        case .trust: "個人"
         }
     }
 
@@ -40,9 +40,18 @@ enum AppTab: String, CaseIterable, Identifiable {
         case .explore: "sparkle.magnifyingglass"
         case .review: "person.crop.circle.badge.checkmark"
         case .chats: "bubble.left.and.bubble.right"
-        case .trust: "checkmark.seal"
+        case .trust: "person.crop.circle"
         }
     }
+}
+
+enum BiologicalSex: String, CaseIterable, Identifiable, Hashable {
+    case female = "女性"
+    case male = "男性"
+    case intersex = "雙性／間性"
+    case undisclosed = "不公開"
+
+    var id: String { rawValue }
 }
 
 enum CommissionType: String, CaseIterable, Identifiable, Hashable {
@@ -106,17 +115,46 @@ enum CommissionType: String, CaseIterable, Identifiable, Hashable {
 }
 
 struct UserProfile: Identifiable, Hashable {
-    let id = UUID()
+    let id: UUID
     var name: String
     var handle: String
     var avatar: String
     var age: Int
+    var biologicalSex: BiologicalSex
     var neighborhood: String
     var bio: String
     var pigeonIndex: Int
     var punctuality: Int
     var completedEvents: Int
     var tags: [String]
+
+    init(
+        id: UUID = UUID(),
+        name: String,
+        handle: String,
+        avatar: String,
+        age: Int,
+        biologicalSex: BiologicalSex,
+        neighborhood: String,
+        bio: String,
+        pigeonIndex: Int,
+        punctuality: Int,
+        completedEvents: Int,
+        tags: [String]
+    ) {
+        self.id = id
+        self.name = name
+        self.handle = handle
+        self.avatar = avatar
+        self.age = age
+        self.biologicalSex = biologicalSex
+        self.neighborhood = neighborhood
+        self.bio = bio
+        self.pigeonIndex = pigeonIndex
+        self.punctuality = punctuality
+        self.completedEvents = completedEvents
+        self.tags = tags
+    }
 }
 
 struct JoinCommission: Identifiable, Hashable {
@@ -255,4 +293,68 @@ struct ActivityChat: Identifiable, Hashable {
         self.participants = participants
         self.messages = messages
     }
+}
+
+struct CompletedActivity: Identifiable, Hashable {
+    let id: UUID
+    var commissionID: UUID
+    var title: String
+    var participantIDs: [UUID]
+    var completedAtText: String
+
+    init(
+        id: UUID = UUID(),
+        commissionID: UUID,
+        title: String,
+        participantIDs: [UUID],
+        completedAtText: String
+    ) {
+        self.id = id
+        self.commissionID = commissionID
+        self.title = title
+        self.participantIDs = participantIDs
+        self.completedAtText = completedAtText
+    }
+}
+
+struct EventReview: Identifiable, Hashable {
+    let id: UUID
+    var activityID: UUID
+    var reviewerID: UUID
+    var revieweeID: UUID
+    var punctuality: Int
+    var communication: Int
+    var completion: Int
+    var comment: String
+
+    init(
+        id: UUID = UUID(),
+        activityID: UUID,
+        reviewerID: UUID,
+        revieweeID: UUID,
+        punctuality: Int,
+        communication: Int,
+        completion: Int,
+        comment: String
+    ) {
+        self.id = id
+        self.activityID = activityID
+        self.reviewerID = reviewerID
+        self.revieweeID = revieweeID
+        self.punctuality = punctuality
+        self.communication = communication
+        self.completion = completion
+        self.comment = comment
+    }
+
+    var score: Int {
+        Int((Double(punctuality + communication + completion) / 15 * 100).rounded())
+    }
+}
+
+struct PendingReview: Identifiable, Hashable {
+    var activity: CompletedActivity
+    var reviewee: UserProfile
+
+    var id: String { "\(activity.id.uuidString)-\(reviewee.id.uuidString)" }
 }

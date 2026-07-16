@@ -2,7 +2,7 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var selectedTab: AppTab
-    @StateObject private var store = JoinMeStore()
+    @State private var store = JoinMeStore()
 
     init() {
         _selectedTab = State(initialValue: AppTab.launchDefault)
@@ -35,7 +35,7 @@ struct ContentView: View {
             .tag(AppTab.trust)
         }
         .tint(JoinMeStyle.leaf)
-        .environmentObject(store)
+        .environment(store)
     }
 }
 

@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct ChatListView: View {
-    @EnvironmentObject private var store: JoinMeStore
+    @Environment(JoinMeStore.self) private var store
 
     var body: some View {
         Group {
@@ -62,7 +62,7 @@ struct ChatRow: View {
 }
 
 struct ChatDetailView: View {
-    @EnvironmentObject private var store: JoinMeStore
+    @Environment(JoinMeStore.self) private var store
     var chatID: UUID
     @State private var draft = ""
 

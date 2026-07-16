@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct CommissionDetailView: View {
-    @EnvironmentObject private var store: JoinMeStore
+    @Environment(JoinMeStore.self) private var store
     var commissionID: UUID
     @Binding var selectedTab: AppTab
     @State private var note = "我可以準時到，想用低壓方式一起完成這個委託。"
@@ -77,6 +77,9 @@ struct CommissionDetailView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("\(host.name) \(host.handle)")
                         .font(.headline)
+                    Text("\(host.biologicalSex.rawValue) · \(host.age) 歲 · \(host.neighborhood)")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(JoinMeStyle.leaf)
                     Text(host.bio)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
@@ -146,7 +149,7 @@ struct CommissionDetailView: View {
                 }
                 .buttonStyle(.borderedProminent)
             } else {
-                Label("已送出申請。展示模式會讓你切到發起人視角完成審核。", systemImage: "paperplane.circle.fill")
+                Label("申請已送出，發起人回覆後會更新狀態。", systemImage: "paperplane.circle.fill")
                     .font(.subheadline)
                     .foregroundStyle(JoinMeStyle.leaf)
                     .fixedSize(horizontal: false, vertical: true)
@@ -154,7 +157,7 @@ struct CommissionDetailView: View {
                 Button {
                     selectedTab = .review
                 } label: {
-                    Label("前往審核流程", systemImage: "arrow.right.circle")
+                    Label("查看申請狀態", systemImage: "arrow.right.circle")
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.bordered)

@@ -19,6 +19,22 @@ struct BrandGradient: View {
     }
 }
 
+struct JoinMeWordmark: View {
+    var body: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
+            Text("Join me")
+                .font(.system(.largeTitle, design: .rounded).weight(.black))
+                .italic()
+                .foregroundStyle(.black)
+            Text("揪ㄇ")
+                .font(.system(.title2, design: .rounded).weight(.heavy))
+                .foregroundStyle(.black)
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Join me 揪ㄇ")
+    }
+}
+
 struct JMTag: View {
     var text: String
     var isSelected: Bool = false

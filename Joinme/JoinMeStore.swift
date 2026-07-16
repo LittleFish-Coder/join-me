@@ -1,13 +1,16 @@
 import Foundation
-import Combine
+import Observation
 import SwiftUI
 
 @MainActor
-final class JoinMeStore: ObservableObject {
-    @Published var commissions: [JoinCommission]
-    @Published var applications: [JoinApplication]
-    @Published var chats: [ActivityChat]
-    @Published var currentUser: UserProfile
+@Observable
+final class JoinMeStore {
+    var commissions: [JoinCommission]
+    var applications: [JoinApplication]
+    var chats: [ActivityChat]
+    var currentUser: UserProfile
+    var completedActivities: [CompletedActivity]
+    var reviews: [EventReview]
 
     init() {
         let me = UserProfile(
@@ -15,6 +18,7 @@ final class JoinMeStore: ObservableObject {
             handle: "@merliah",
             avatar: "羽",
             age: 27,
+            biologicalSex: .female,
             neighborhood: "台北大安",
             bio: "喜歡臨時揪咖啡、展覽和散步。希望先把事情完成，不急著變很熟。",
             pigeonIndex: 3,
@@ -27,6 +31,7 @@ final class JoinMeStore: ObservableObject {
             handle: "@aster",
             avatar: "哲",
             age: 29,
+            biologicalSex: .male,
             neighborhood: "松山",
             bio: "下班後常在信義區出沒，偏好明確行程和輕鬆聊天。",
             pigeonIndex: 1,
@@ -39,6 +44,7 @@ final class JoinMeStore: ObservableObject {
             handle: "@ninafilm",
             avatar: "妮",
             age: 25,
+            biologicalSex: .female,
             neighborhood: "中山",
             bio: "底片、甜點、跑咖路線蒐集中。",
             pigeonIndex: 5,
@@ -51,6 +57,7 @@ final class JoinMeStore: ObservableObject {
             handle: "@momoexpo",
             avatar: "墨",
             age: 23,
+            biologicalSex: .undisclosed,
             neighborhood: "板橋",
             bio: "ACG、漫展和同好排隊互助。",
             pigeonIndex: 7,
@@ -63,6 +70,7 @@ final class JoinMeStore: ObservableObject {
             handle: "@kaikai",
             avatar: "凱",
             age: 31,
+            biologicalSex: .male,
             neighborhood: "信義",
             bio: "演唱會前後找人一起吃點東西，行程清楚就好。",
             pigeonIndex: 2,
@@ -169,6 +177,25 @@ final class JoinMeStore: ObservableObject {
                 ]
             )
         ]
+
+        let completedWalk = CompletedActivity(
+            commissionID: milkTea.id,
+            title: "下班後散步買飲料",
+            participantIDs: [me.id, aster.id],
+            completedAtText: "昨天 20:40"
+        )
+        completedActivities = [completedWalk]
+        reviews = [
+            EventReview(
+                activityID: completedWalk.id,
+                reviewerID: aster.id,
+                revieweeID: me.id,
+                punctuality: 5,
+                communication: 5,
+                completion: 4,
+                comment: "時間與集合點都確認得很清楚。"
+            )
+        ]
     }
 
     var allTags: [String] {
@@ -189,6 +216,105 @@ final class JoinMeStore: ObservableObject {
 
     var myApplications: [JoinApplication] {
         applications.filter { $0.applicant.id == currentUser.id }
+    }
+
+    var pendingReviews: [PendingReview] {
+        completedActivities.flatMap { activity in
+            guard activity.participantIDs.contains(currentUser.id) else { return [PendingReview]() }
+
+            return activity.participantIDs.compactMap { participantID in
+                guard participantID != currentUser.id,
+                      !reviews.contains(where: {
+                          $0.activityID == activity.id
+                              && $0.reviewerID == currentUser.id
+                              && $0.revieweeID == participantID
+                      }),
+                      let participant = user(id: participantID) else {
+                    return nil
+                }
+                return PendingReview(activity: activity, reviewee: participant)
+            }
+        }
+    }
+
+    func user(id: UUID) -> UserProfile? {
+        if currentUser.id == id { return currentUser }
+        return commissions.lazy.map(\.host).first { $0.id == id }
+            ?? applications.lazy.map(\.applicant).first { $0.id == id }
+            ?? chats.lazy.flatMap(\.participants).first { $0.id == id }
+    }
+
+    func userScore(for userID: UUID) -> Int? {
+        let received = reviews.filter { $0.revieweeID == userID }
+        guard !received.isEmpty else { return nil }
+        return Int((Double(received.map(\.score).reduce(0, +)) / Double(received.count)).rounded())
+    }
+
+    func reviewCount(for userID: UUID) -> Int {
+        reviews.count { $0.revieweeID == userID }
+    }
+
+    func submitReview(
+        activityID: UUID,
+        revieweeID: UUID,
+        punctuality: Int,
+        communication: Int,
+        completion: Int,
+        comment: String
+    ) {
+        guard completedActivities.contains(where: {
+            $0.id == activityID
+                && $0.participantIDs.contains(currentUser.id)
+                && $0.participantIDs.contains(revieweeID)
+        }), !reviews.contains(where: {
+            $0.activityID == activityID
+                && $0.reviewerID == currentUser.id
+                && $0.revieweeID == revieweeID
+        }) else { return }
+
+        reviews.append(
+            EventReview(
+                activityID: activityID,
+                reviewerID: currentUser.id,
+                revieweeID: revieweeID,
+                punctuality: min(max(punctuality, 1), 5),
+                communication: min(max(communication, 1), 5),
+                completion: min(max(completion, 1), 5),
+                comment: comment.trimmingCharacters(in: .whitespacesAndNewlines)
+            )
+        )
+    }
+
+    func updateCurrentUser(
+        name: String,
+        handle: String,
+        age: Int,
+        biologicalSex: BiologicalSex,
+        neighborhood: String,
+        bio: String,
+        tags: [String]
+    ) {
+        currentUser.name = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedHandle = handle.trimmingCharacters(in: .whitespacesAndNewlines)
+        currentUser.handle = trimmedHandle.hasPrefix("@") ? trimmedHandle : "@\(trimmedHandle)"
+        currentUser.age = min(max(age, 18), 100)
+        currentUser.biologicalSex = biologicalSex
+        currentUser.neighborhood = neighborhood.trimmingCharacters(in: .whitespacesAndNewlines)
+        currentUser.bio = bio.trimmingCharacters(in: .whitespacesAndNewlines)
+        currentUser.tags = tags
+
+        for index in commissions.indices where commissions[index].isHostedByCurrentUser {
+            commissions[index].host = currentUser
+        }
+        for index in applications.indices where applications[index].applicant.id == currentUser.id {
+            applications[index].applicant = currentUser
+        }
+        for chatIndex in chats.indices {
+            for participantIndex in chats[chatIndex].participants.indices
+                where chats[chatIndex].participants[participantIndex].id == currentUser.id {
+                chats[chatIndex].participants[participantIndex] = currentUser
+            }
+        }
     }
 
     func commission(id: UUID) -> JoinCommission? {
@@ -289,7 +415,7 @@ final class JoinMeStore: ObservableObject {
             type: finalType,
             customTypeTitle: finalType == .other ? trimmedCustomType : nil,
             host: currentUser,
-            summary: "這是一張 MVP 快速發布的委託單，用來展示發起後可收到申請並進行審核。",
+            summary: "把集合方式與期待先說清楚，找到適合的人後就能在專屬聊天室確認細節。",
             tags: tags,
             accent: .mint,
             pinX: 0.56,

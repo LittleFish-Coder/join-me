@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct ReviewView: View {
-    @EnvironmentObject private var store: JoinMeStore
+    @Environment(JoinMeStore.self) private var store
     @Binding var selectedTab: AppTab
     @State private var isPresentingComposer = ProcessInfo.processInfo.arguments.contains("--show-composer")
     @State private var myCommissionScope: MyCommissionScope = .hosted
@@ -23,7 +23,7 @@ struct ReviewView: View {
                 Button {
                     isPresentingComposer = true
                 } label: {
-                    Image(systemName: "plus")
+                    Label("發布", systemImage: "plus")
                 }
                 .accessibilityLabel("發布委託")
             }
@@ -38,12 +38,12 @@ struct ReviewView: View {
 
     private var reviewHero: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Label("展示模式", systemImage: "rectangle.stack.badge.person.crop")
+            Label("委託管理", systemImage: "rectangle.stack.badge.person.crop")
                 .font(.caption.weight(.bold))
                 .foregroundStyle(JoinMeStyle.leaf)
             Text("審核誰可以加入")
                 .font(.title2.weight(.bold))
-            Text("MVP 會模擬發起人視角：看申請者基本資料、鴿子指數、準時度，錄取後立刻建立活動聊天室。")
+            Text("查看申請者的基本資料與赴約紀錄；錄取後會立即建立活動聊天室。")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -60,7 +60,7 @@ struct ReviewView: View {
                 ContentUnavailableView(
                     "目前沒有待審核",
                     systemImage: "checkmark.circle",
-                    description: Text("可以先從探索頁投遞，或按右上角快速發布一張委託。")
+                    description: Text("發布委託後，新的申請會顯示在這裡。")
                 )
                 .padding(.vertical, 20)
                 .background(.white, in: RoundedRectangle(cornerRadius: 8))
@@ -283,7 +283,7 @@ struct CommissionEditDraft: Identifiable {
 }
 
 struct EditCommissionSheet: View {
-    @EnvironmentObject private var store: JoinMeStore
+    @Environment(JoinMeStore.self) private var store
     @Environment(\.dismiss) private var dismiss
     @State private var draft: CommissionEditDraft
 
@@ -395,7 +395,7 @@ struct ApplicationCard: View {
 }
 
 struct QuickCommissionSheet: View {
-    @EnvironmentObject private var store: JoinMeStore
+    @Environment(JoinMeStore.self) private var store
     @Environment(\.dismiss) private var dismiss
     @State private var title = "下班後一起走信義散步路線"
     @State private var area = "台北信義"
@@ -443,7 +443,7 @@ struct QuickCommissionSheet: View {
                 }
 
                 Section {
-                    Text("MVP 先保留核心欄位，完整產品可再加入人數、條件、付款、集合點與安全提醒。")
+                    Text("發布前請確認時間、地點與活動目的，讓加入的人能快速判斷是否適合。")
                         .foregroundStyle(.secondary)
                 }
             }

@@ -48,7 +48,7 @@ document.querySelectorAll("[data-form='waitlist']").forEach((form) => {
     button.disabled = true;
     button.textContent = "送出中…";
     try {
-      const response = await fetch("/api/waitlist", {
+      const response = await fetch("./api/waitlist", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: email.value, source: form.dataset.source })
@@ -78,7 +78,7 @@ supportForm?.addEventListener("submit", async (event) => {
   button.textContent = "送出中…";
 
   try {
-    const response = await fetch("/api/support", {
+    const response = await fetch("./api/support", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(Object.fromEntries(data.entries()))

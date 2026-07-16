@@ -107,7 +107,7 @@ h3 { font-size: 1.35rem; }
 .request-one { left: -8px; top: 108px; transform: rotate(-2deg); }
 .request-two { right: -10px; bottom: 82px; transform: rotate(1deg); }
 .bird-scene { position: absolute; z-index: 1; left: 4px; bottom: 0; width: 320px; height: 160px; overflow: hidden; }
-.bird-scene img { position: relative; z-index: 2; width: 145px; height: 145px; margin-left: 66px; object-fit: cover; mix-blend-mode: multiply; border-radius: 48%; }
+.bird-scene img { position: relative; z-index: 2; width: 145px; height: 145px; margin-left: 66px; object-fit: cover; border-radius: 32%; box-shadow: 0 18px 30px rgba(34, 72, 92, 0.2); }
 .bird-scene span { position: absolute; left: 0; right: 0; bottom: -70px; height: 140px; border-radius: 50%; background: radial-gradient(ellipse, rgba(16,169,145,.28), rgba(255,180,59,.18) 45%, transparent 68%); filter: blur(6px); }
 
 .why { padding: 100px 70px 110px; text-align: center; background: rgba(255,255,255,.78); border-radius: var(--radius-lg); }
@@ -164,7 +164,8 @@ h3 { font-size: 1.35rem; }
 
 .waitlist { position: relative; min-height: 330px; margin-top: 60px; padding: 64px 80px; display: grid; grid-template-columns: 270px 1fr; align-items: center; overflow: hidden; border-radius: var(--radius-lg); background: #078f86; color: #fff; }
 .waitlist::after { content: ""; position: absolute; width: 300px; height: 300px; right: -50px; bottom: -170px; border-radius: 50%; background: radial-gradient(circle, rgba(255,180,59,.65), transparent 68%); }
-.waitlist-bird img { width: 190px; height: 190px; object-fit: cover; border-radius: 45%; mix-blend-mode: screen; }
+.waitlist-bird { width: 220px; height: 220px; display: grid; place-items: center; }
+.waitlist-bird img { width: 190px; height: 190px; object-fit: cover; border-radius: 30%; box-shadow: 0 18px 32px rgba(3, 69, 91, 0.24); }
 .waitlist-copy { position: relative; z-index: 2; }
 .waitlist h2 { font-size: clamp(2rem, 4vw, 3.6rem); margin-bottom: 12px; }
 .waitlist-copy > p { margin-bottom: 24px; color: rgba(255,255,255,.82); }

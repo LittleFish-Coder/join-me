@@ -1,21 +1,34 @@
 event: iOS AI Summer Camp 2026
 name: Join Me 揪ㄇ
 team_name: 揪ㄇ
-category: Food & Drink
-intro: Join Me 是一款以活動為核心的輕社交 App。使用者可以發布或加入「委託」，快速找到一起完成當下活動的夥伴。無論是買一送一湊單、看展、拍照、運動或參加演唱會，使用者不必先建立長期關係，也不必承受傳統交友軟體帶來的社交壓力。Join Me 希望讓面對面的揪團，就像在線上遊戲找隊友一樣簡單。 Join Me is an activity-centered social app that helps people quickly find companions for whatever they want to do. Whether it's sharing a buy-one-get-one deal, visiting an exhibition, taking photos, working out, or attending a concert, users can create or join a request without first building a long-term relationship or dealing with the pressure of traditional dating apps. Join Me makes organizing in-person activities as easy as finding teammates in an online game.
+category: Food, Drink, Social
+intro: |-
+  把「想做」變成「一起出發」
+  Join Me 是一款以活動為核心的輕社交 App。
+  使用者可以發布或加入「委託」，快速找到一起完成當下活動的夥伴。
+  Join Me 希望讓面對面的揪團，就像在線上遊戲找隊友一樣簡單。
 localizations:
   zh-TW:
     name: Join Me 揪ㄇ
-    intro: Join Me 是一款以活動為核心的輕社交 App。使用者可以發布或加入「委託」，快速找到一起完成當下活動的夥伴。無論是買一送一湊單、看展、拍照、運動或參加演唱會，使用者不必先建立長期關係，也不必承受傳統交友軟體帶來的社交壓力。Join Me 希望讓面對面的揪團，就像在線上遊戲找隊友一樣簡單。
+    intro: |-
+      把「想做」變成「一起出發」
+
+      Join Me 是一款以活動為核心的輕社交 App。
+      使用者可以發布或加入「委託」，快速找到一起完成當下活動的夥伴。
+      Join Me 希望讓面對面的揪團，就像在線上遊戲找隊友一樣簡單。
   en:
     name: Join Me
-    intro: Join Me is an activity-centered social app that helps people quickly find companions for whatever they want to do. Whether it's sharing a buy-one-get-one deal, visiting an exhibition, taking photos, working out, or attending a concert, users can create or join a request without first building a long-term relationship or dealing with the pressure of traditional dating apps. Join Me makes organizing in-person activities as easy as finding teammates in an online game.
+    intro: |-
+      Turn “I want to” into “Let’s go together.”
+
+      Join Me is an activity-centered social app.
+      Users can create or join requests and quickly find companions.
+      Join Me makes meeting up as easy as finding teammates in an online game.
 video_url: https://youtube.com/shorts/EYnQTHSOJz8
 poster_site: https://littlefish-coder.github.io/join-me/
 icon: .scc/media/icon.png
 screenshots:
-  - .scc/media/screenshots/Onboarding.png
-  - .scc/media/screenshots/Step1.png
-  - .scc/media/screenshots/Step2.png
-  - .scc/media/screenshots/Step3.png
-  - .scc/media/screenshots/Step5.png
+  - .scc/media/screenshots/1.png
+  - .scc/media/screenshots/2.png
+  - .scc/media/screenshots/3.png
+  - .scc/media/screenshots/4.png

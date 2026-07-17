@@ -59,13 +59,15 @@ enum CommissionType: String, CaseIterable, Identifiable, Hashable {
     case food
     case cafe
     case fandom
-    case concert
+    case music
+    case fitness
+    case career
     case walk
     case transit
     case other
 
     static var selectableCases: [CommissionType] {
-        [.food, .cafe, .fandom, .concert, .walk, .transit, .other]
+        [.food, .cafe, .fandom, .music, .fitness, .career, .walk, .transit, .other]
     }
 
     var id: String { rawValue }
@@ -76,7 +78,9 @@ enum CommissionType: String, CaseIterable, Identifiable, Hashable {
         case .food: "吃喝"
         case .cafe: "跑咖拍照"
         case .fandom: "同好"
-        case .concert: "活動演出"
+        case .music: "音樂"
+        case .fitness: "健身"
+        case .career: "職涯"
         case .walk: "散步"
         case .transit: "交通同行"
         case .other: "其他"
@@ -89,7 +93,9 @@ enum CommissionType: String, CaseIterable, Identifiable, Hashable {
         case .food: "cup.and.saucer.fill"
         case .cafe: "camera.fill"
         case .fandom: "star.bubble.fill"
-        case .concert: "music.mic"
+        case .music: "music.note.list"
+        case .fitness: "figure.strengthtraining.traditional"
+        case .career: "briefcase.fill"
         case .walk: "figure.walk"
         case .transit: "tram.fill"
         case .other: "square.grid.2x2.fill"
@@ -102,7 +108,9 @@ enum CommissionType: String, CaseIterable, Identifiable, Hashable {
         case .food: "吃喝"
         case .cafe: "跑咖"
         case .fandom: "同好"
-        case .concert: "演唱會"
+        case .music: "音樂"
+        case .fitness: "健身"
+        case .career: "職涯"
         case .walk: "散步"
         case .transit: "交通"
         case .other: "其他"

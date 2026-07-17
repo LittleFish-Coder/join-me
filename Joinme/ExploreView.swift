@@ -133,7 +133,7 @@ struct ExploreView: View {
             HStack(spacing: 10) {
                 Image(systemName: "magnifyingglass")
                     .foregroundStyle(.secondary)
-                TextField("搜尋手搖飲、跑咖、演唱會", text: $query)
+                TextField("搜尋健身、職涯、音樂", text: $query)
                     .textInputAutocapitalization(.never)
             }
             .padding(12)
